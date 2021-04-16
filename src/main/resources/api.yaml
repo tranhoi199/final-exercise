@@ -1,0 +1,268 @@
+openapi: 3.0.0
+info:
+  description: API specification for SuperBlog microservice
+  version: v3
+  title: SuperBlog microservice API
+servers:
+  - url: http://localhost:8080/
+paths:
+
+  /users:
+    get:
+      tags:
+        - getUserList
+      summary: Get all users
+      operationId: getUserList
+      responses:
+        '200':
+          description: Get user list successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+
+    post:
+      tags:
+        - createUser
+      summary: Create user
+      operationId: createUser
+      requestBody:
+        description: Create user
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: Create user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectCreationSuccessResponse'
+  /users/find-by-email:
+    get:
+      tags:
+        - search user by email
+      summary: Search user by email
+      operationId: findUserByEmail
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: false
+      responses:
+        '200':
+          description: Search user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+
+  /tasks/{userId}:
+    get:
+      tags:
+        - getTaskOfUser
+      summary: get tasks of user
+      operationId: getTasksOfUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: id of user
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: get tasks successfull
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+    post:
+      tags:
+        - createTask
+      summary: create task
+      operationId: createTaskOfUser
+      description: create task
+      requestBody:
+        description: create task request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: id of user
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Create user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectCreationSuccessResponse'
+    put:
+      tags:
+        - updateTask
+      summary: update particular task of user
+      operationId: updateTaskOfUser
+      description: update task
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: id of user
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: update task successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResposneModel'
+  /tasks/{userId}/{taskId}:
+    delete:
+      tags:
+        - deleteTask
+      summary: delete particluar task of user
+      operationId: deleteTaskOfUser
+      description: delete task
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: id of user
+          schema:
+            type: string
+        - name: taskId
+          in: path
+          required: true
+          description: id of Task
+          schema:
+            type: string
+      responses:
+        '200':
+          description: delete task successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectDeletionSuccessResponse'
+
+
+components:
+  schemas:
+    UserListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponseModel'
+    UserResponseModel:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        id:
+          type: string
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    UpdateTaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        taskId:
+          type: string
+
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+
+
+    ObjectCreationSuccessResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        responseCode:
+          type: integer
+
+    ObjectDeletionSuccessResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        responseCode:
+          type: integer
+    TaskResposneModel:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    TaskListResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResposneModel'
+
+    ApiError:
+      type: object
+      properties:
+        faults:
+          type: array
+          items:
+            $ref: "#/components/schemas/Fault"
+        responseCode:
+          type: integer
+    Fault:
+      type: object
+      properties:
+        internalMessage:
+          type: string
+        code:
+          type: integer
+        userMessage:
+          type: string
+
+  examples:
+    InternalServerError:
+      value:
+        responseCode: 500
+        faults:
+          -:
+          userMessage: There're some error when processing this request. Please retry again or contact the site administrator for supporting
+          internalMessage: Internal server error
+          code: 1000
+          responseCode: 500
